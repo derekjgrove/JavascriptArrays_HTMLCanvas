@@ -1,0 +1,18 @@
+@CHARSET "ISO-8859-1";
+/*Style the Heading1, Heading3, and Paragraph segments*/
+h1 {
+	font-family: Constantia;
+	Color: Black;
+	text-decoration: italic;
+}
+h3 {
+	font-family: Lucida Console;
+	font-size: 24px;
+	color: Grey;
+	text-decoration: underline;
+}
+p {
+	font-family: Consolas;
+	font-size: 16px;
+	color: black;
+}

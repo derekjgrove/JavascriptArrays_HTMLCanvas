@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<!--Canvas alteration of the source code that I stole. Here is a small Mario
+demo that features a sort of artificial gravity, and the usage of various
+key listeners-->
+
+<html>
+<head>
+<title>Mario Demo</title>
+<style type="text/css">
+	body {margin: 0}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script type="text/javascript">
+
+//Get the canvas 2d library
+var canvas = document.getElementById('canvas'),
+ctx = canvas.getContext('2d');
+			
+//Set the canvas height and width equal to the frame it
+//resides in
+canvas.width = document.documentElement.clientWidth;
+canvas.height = document.documentElement.clientHeight;
+
+//Initialize the game logger
+var game = {
+	images: 0,
+	imagesLoaded: 0,
+	backgroundColor: '#FFF',
+}
+
+//image, pixel resolution L x W
+var spriteTiles = new Tileset('mysprite.png', 225, 225);
+var fireTile = new Tileset('marioBall.png', 35, 35);
+
+//all of the action states
+var chillLeftAnim = new Animation(spriteTiles, ['0,0'], 100);
+var chillRightAnim = new Animation(spriteTiles, ['0,1'], 100);
+var runLeftAnim = new Animation(spriteTiles, ['1,0','2,0', '3,0', '4,0'], 100);
+var runRightAnim = new Animation(spriteTiles, ['1,1', '2,1', '3,1', '4,1'], 100);
+var jumpLeftAnim = new Animation(spriteTiles, ['5,0', '6,0'], 400);
+var jumpRightAnim = new Animation(spriteTiles, ['5,1', '6,1'], 400);
+var descendLeftAnim = new Animation(spriteTiles, ['7,0'], 450);
+var descendRightAnim = new Animation(spriteTiles, ['7,1'], 450);
+
+//Assign the player all of their action states
+var player = new Sprite({'chillLeft': chillLeftAnim, 'chillRight': chillRightAnim, 'left': runLeftAnim,
+	'right': runRightAnim,'jumpLeft': jumpLeftAnim, 'jumpRight': jumpRightAnim,
+	'descendLeft': descendLeftAnim, 'descendRight': descendRightAnim},'chillLeft',
+	canvas.width / 2, canvas.height - 100, 100, 100, 500); 
+
+//Key down and up objects, used as logger		
+var keysDown = {};
+var keysUp = {};
+
+var jumpSound = new Audio("jump.wav");
+var openingSound = new Audio("itmario.wav");
+openingSound.play();
+var projectiles = [];
+var then = Date.now();
+player.projectileTimer = Date.now();
+
+player.shootDelay = 1500;
+setInterval(main, 10);
+
+var upDown = 1;
+var fTrue = 0;
+
+//If A key is pressed then push the keycode to the array and pop from
+//the keys up array
+window.addEventListener('keydown', function(e) {
+	//Disable scrolling with the arrow and space keys
+	if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+		e.preventDefault();
+	}
+		
+	keysDown[e.keyCode] = true;
+	delete keysUp[e.keyCode];
+});
+
+//If A key is released then push the keycode to the array and pop from
+//the keys up array
+window.addEventListener('keyup', function(e) {
+	keysUp[e.keyCode] = true;
+	delete keysDown[e.keyCode];
+});
+
+/*
+Increment the number of images loaded, as new one is created
+*/
+function imageLoaded() {
+	game.imagesLoaded ++;
+}
+
+/*
+Set each image sprite in the array to have a tile.
+@param image - the image in the tile
+@param tileWidth - the width of the tile
+@param tileHeight - the height of the tile
+*/		
+function Tileset(image, tileWidth, tileHeight) {
+	this.image = new Image();
+	game.images ++;
+	this.image.onload = imageLoaded;
+	this.image.src = image;
+	this.tileWidth = tileWidth;
+	this.tileHeight = tileHeight;
+}
+
+/*
+Set the game timer, the frame order and how long those
+frames are displayed
+@param tileset - the set of tiles for a given action
+@param frames - the amount of frames in the tileset
+@param frameDuration - the duration of time the frame is displayed
+*/		
+function Animation(tileset, frames, frameDuration) {
+	this.tileset = tileset;
+	this.frames = frames;
+	this.currentFrame = 0;
+	this.frameTimer = Date.now();
+	this.frameDuration = frameDuration;
+}
+
+/*
+Declaring the different variable object for actions
+@param stateAnimations - the animation for a given state
+@param startingState - the state in which is pre-loaded
+@param x - the horizontal starting location of the player
+@param y - the vertical starting location of the player
+@param width - the width of the animation
+@param height - the height of the animation
+@param speed - the speed of the animation transmission
+*/		
+function Sprite(stateAnimations, startingState, x, y, width, height, speed) {
+	this.stateAnimations = stateAnimations;
+	this.currentState = startingState;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.speed = speed;
+}
+
+/*
+Split the images up within the sprite
+@param sprite - the sprite image
+*/		
+function drawSprite(sprite) {
+	ctx.drawImage(
+		sprite.stateAnimations[sprite.currentState].tileset.image, 
+		sprite.stateAnimations[sprite.currentState].frames[sprite.stateAnimations[sprite.currentState].currentFrame].split(',')[0] * 
+			sprite.stateAnimations[sprite.currentState].tileset.tileWidth,
+		sprite.stateAnimations[sprite.currentState].frames[sprite.stateAnimations[sprite.currentState].currentFrame].split(',')[1] *
+			sprite.stateAnimations[sprite.currentState].tileset.tileHeight,
+		sprite.stateAnimations[sprite.currentState].tileset.tileWidth,
+		sprite.stateAnimations[sprite.currentState].tileset.tileHeight,
+		Math.round(sprite.x),
+		Math.round(sprite.y),
+		sprite.width,
+		sprite.height
+	);
+}
+
+/*
+Update the sprite in which is being used.
+If there is multiple images within an array, increment
+otherwise use the same one.
+@param anim - the image array in which to look at
+@param boolDirection - the direction flage in which
+the player is going.
+	@lTrue - 1=Left, 0=Right
+	@fTrue - 1=Falling, 0=Not falling
+*/		
+function updateAnimation(anim, boolDirection) {
+	if (Date.now() - anim.frameTimer > anim.frameDuration) {
+		if (anim.currentFrame < anim.frames.length - 1) {
+			anim.currentFrame ++;
+		} else {
+			anim.currentFrame = 0;
+		}
+		anim.frameTimer = Date.now();
+	}
+}
+
+/*
+Set what the projectile looks like, and the prajectory it takes
+@param x - the x coordinate
+@param y - the y coordinate
+@param speed - the speed in which the projectile travels
+*/	
+function Projectile(x, y, speed) {
+	this.x = x;
+	this.y = y;
+	this.speed = speed;
+}
+
+/*
+Draw the projectile Image
+Break the image into quadrants
+@param x - the x coordinate
+@param y - the y coordinate
+*/		
+function drawSquare(x, y) {
+	ctx.drawImage(
+		fireTile.image,
+		Math.round(x),
+		Math.round(y)
+	);
+}
+
+/*
+Update the projectiles in the array
+@param mod - the set speed to multiply by
+*/
+function updateProjectiles(mod) {
+
+	for (var key in projectiles) {
+		//Ball goes left or right based on the state of the player
+		if (player.currentState == 'left' || player.currentState == 'descendLeft' || 
+			player.currentState == 'jumpLeft' || player.currentState == 'chillLeft') {
+			projectiles[key].x -= projectiles[key].speed * mod;
+		} else if (player.currentState == 'right' || player.currentState == 'descendRight' ||
+			player.currentState == 'jumpRight' || player.currentState == 'chillRight') {
+			projectiles[key].x += projectiles[key].speed * mod;
+		}
+
+		//Set the global variable if a bound is collided with
+		if (projectiles[key].y >= canvas.height - 35) {
+			upDown = 0;
+		} else if (projectiles[key].y <= canvas.height*0.7) {
+			upDown = 1;
+		}
+
+		//Go the vertical direction until changed
+		if (upDown == 1) {
+			projectiles[key].y += projectiles[key].speed * mod;
+		} else if (upDown == 0) {
+			projectiles[key].y -= projectiles[key].speed * mod;
+		}
+
+		//Remove projectile when it exits the active screen
+		if (projectiles[key].x > canvas.width || projectiles[key].x < 0) {
+			projectiles.splice(key, 1);
+		}
+	}
+}
+
+
+/*
+Event Handler function.
+If a user presses a key then do something.
+@param mod - the interval in which to multiply
+*/		
+function update(mod) {
+		
+	//Booleans for horizontal and vertical direction	
+	var lTrue = 1;
+
+	// [   ] Space Bar
+	if (32 in keysDown && Date.now() - player.projectileTimer > player.shootDelay) {
+		projectiles.push(new Projectile(player.x + player.width / 2, player.y, 350));
+		player.projectileTimer = Date.now();
+	}
+
+	updateProjectiles(mod);
+
+		
+
+	//Artificial Gravity
+	if (player.y <= (canvas.height)-player.height && 38 in keysUp) {
+		fTrue = 1;
+
+		player.y += player.speed * mod;
+	}
+
+	// <-- Left Arrow
+	if (37 in keysDown) {
+		//Reset falling boolean if on the ground
+		if (player.y >= (canvas.height)-player.height) {
+			fTrue = 0;
+		}
+		lTrue = 1;
+		if (fTrue == 0) {
+			player.currentState = 'left';
+		} else {
+			player.currentState = 'descendLeft';
+		}
+		player.x -= player.speed * mod;
+		updateAnimation(player.stateAnimations[player.currentState], lTrue);
+		if (38 in keysDown && player.y >= (canvas.height/2)-100 && fTrue == 0) {
+			jumpSound.play();
+			fTrue = 0;
+			player.currentState = 'jumpLeft';
+			player.y -= player.speed * mod;
+			updateAnimation(player.stateAnimations[player.currentState], fTrue);
+		}
+	} // --> Right Arrow
+	else if (39 in keysDown) {
+		//Reset falling boolean if on the ground
+		if (player.y >= (canvas.height)-player.height) {
+			fTrue = 0;
+		}
+		lTrue = 0;
+		if (fTrue == 0) {
+			player.currentState = 'right';
+		} else {
+			player.currentState = 'descendRight';
+		}
+		player.x += player.speed * mod;
+		updateAnimation(player.stateAnimations[player.currentState], lTrue);
+		if (38 in keysDown && player.y >= (canvas.height/2)-100 && fTrue == 0) {
+			jumpSound.play();
+			fTrue = 0;
+			player.currentState = 'jumpRight';
+			player.y -= player.speed * mod;
+			updateAnimation(player.stateAnimations[player.currentState], fTrue);
+		}
+	}
+
+	//Releasing of the right arrow
+	if (39 in keysUp) {
+		player.currentState = 'chillRight';
+		updateAnimation(player.stateAnimations[player.currentState], lTrue);
+		delete keysUp[39];
+	} 
+
+	//Releasing of the left arrow
+	if (37 in keysUp) {
+		player.currentState = 'chillLeft';
+		updateAnimation(player.stateAnimations[player.currentState], lTrue);
+		delete keysUp[37];
+	}
+}
+
+/*
+Called each tick. An object renders every tick, providing an animation
+*/		
+function render() {
+	ctx.fillStyle = game.backgroundColor;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	drawSprite(player);
+	ctx.fillStyle = '#000';
+	ctx.font = '15pt Arial';
+	ctx.textBaseline = 'top';
+	ctx.fillText('Click Mine: Arrow keys to move left, right, and jump. Space to shoot', 15, 15);
+	for (var key in projectiles) {
+		drawSquare(projectiles[key].x, projectiles[key].y);
+	}
+}
+
+/*
+Enables the timer, in which is set here.
+*/		
+function main() {
+	update((Date.now() - then) / 1000);
+	if (game.images == game.imagesLoaded) {
+		render();
+	}
+	then = Date.now();
+}
+		
+</script>
+</body>
+</html>

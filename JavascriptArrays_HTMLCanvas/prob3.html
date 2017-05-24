@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<!--A nice thing about lists is that they can share parts of their structure.
+For example, if I create two new values {value: 0, rest: list} and 
+{value: -1, rest: list} (with list referring to the variable defined earlier),
+they are both independent lists, but they share the structure that makes up
+their last three elements. In addition, the original list is also still a valid
+three-element list. Write a function arrayToList that builds up a data structure
+like the previous one when given [1, 2, 3] as argument, and write a listToArray
+function that produces an array from a list. Also write the helper functions
+prepend, which takes an element and a list and creates a new list that adds the
+element to the front of the input list, and nth, which takes a list and a number
+and returns the element at the given position in the list, or undefined when
+there is no such element. If you haven’t already, also write a recursive version
+of nth.-->
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<!--Style the Heading1, Heading3, and Paragraph segments-->
+<style type="text/css">
+h1 {
+	font-family: Constantia;
+	Color: Black;
+	text-decoration: italic;
+}
+h3 {
+	font-family: Lucida Console;
+	font-size: 24px;
+	color: Grey;
+	text-decoration: underline;
+}
+p {
+	font-family: Consolas;
+	font-size: 16px;
+	color: black;
+}
+</style>
+<title>Problem3: A List</title>
+<script type="text/javascript">
+
+/*
+Function to convert an array to a list.
+@param arr - the array object
+*/
+function arrayToList(arr) {
+
+	var list = {};
+	//Assign the next value to the next element
+	list.value = arr[0];
+	//Pop that value in the array
+	arr.shift();
+	//If more elements, recursively go through elements
+	//adding the next to the rest of the previous rest
+	if (arr.length) {
+		list.rest = arrayToList(arr);
+	}
+	return list;
+}
+
+/*
+Function to convert a list to an array
+@param list - the list object
+*/
+function listToArray(list) {
+	var arr = [];
+	//Set the variable equal to the list and increment
+	//if there is a node being pointed to
+	for(i = list; i; i = i.rest) {
+		//Push the rest element to the array
+		arr.push(i.value);
+	}
+	return arr;
+}
+
+/*
+Function to add an element to the head of the list.
+Build a new list adding the element first and pointing to the passed
+in list 
+@param element - the element in which to be appended to head
+@param rList - the list object
+*/
+function prepend(element, rList) {
+	var list = {};
+	list.value = element;
+	list.rest = rList;
+	return list;
+}
+
+/*
+Function to return the target value of a list.
+@param list - the list object being searched.
+@param num - the index in which to return.
+*/
+function nth(list, num) {
+	var counter = 0;
+	//Set the variable equal to the list and increment
+	//if there is a node being pointed to
+	for (i = list; i; i = i.rest) {
+		//When loop counter equals index, return the element
+		if (counter == num) {
+			return i.value;
+		}
+		counter++;
+	}
+	//If index is out of bounds
+	return "Not Found";
+}
+
+/*
+Function to return the a more un-protected list object
+@param list - the list object to decifer
+*/
+function tooString(list) {
+	var stringBuilder = "";
+	//Set the variable equal to the list and increment
+	//if there is a node being pointed to
+	for (i = list; i; i = i.rest) {
+		stringBuilder = stringBuilder + " --> " + i.value;
+	}
+	return stringBuilder + " --> null";
+}
+
+/*
+Function to run a series of tests
+*/
+function displayContent() {
+	document.getElementById('1st').innerHTML = "arrayToList([10,20]) --> " +
+		arrayToList([10,20]) + tooString(arrayToList([10,20]));
+	document.getElementById('2nd').innerHTML = "listToArray(arrayToList([10,20,30])) --> " +
+		listToArray(arrayToList([10,20,30]));
+	document.getElementById('3rd').innerHTML = "prepend(10, prepend(20, null)) --> " +
+		prepend(10, prepend(20, null)) + tooString(prepend(10, prepend(20, null)));
+	document.getElementById('4th').innerHTML = "nth(arrayToList([10,20,30]), 1) -->" +
+		nth(arrayToList([10,20,30]), 1);
+	document.getElementById('5th').innerHTML = "nth(arrayToList([10,20,30]), 5) -->" +
+		nth(arrayToList([10,20,30]), 5);
+	document.getElementById('6th').innerHTML = "prepend(5, (arrayToList[10, 15, 20, 25])) --> " +
+		prepend(5, arrayToList([10, 15, 20, 25])) + tooString(prepend(5, arrayToList([10, 15, 20, 25])));
+}
+
+console.log(arrayToList([10,20]));
+console.log(listToArray(arrayToList([10,20,30])));
+console.log(prepend(10, prepend(20, null)));
+console.log(nth(arrayToList([10,20,30]), 1));
+</script>
+</head>
+
+<!--When the page loads, call the test function to display test results-->
+<body onload="displayContent()">
+<h1>Problem3: A List</h1>
+<h3>Tests</h3>
+
+<!--Create IDs to enable JavaScript writing to the page-->
+<p id='1st'></p>
+<p id='2nd'></p>
+<p id='3rd'></p>
+<p id='4th'></p>
+<p id='5th'></p>
+<p id='6th'></p>
+</body>
+</html>

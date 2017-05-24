@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!--Opening screen for the COSC365 homework assignment. Was not required, however
+wanted to get some experience with the design aspect of html and JavaScript since
+we mainly worked with the functionality and different computations that JavaScript
+can do.
+This isn't pretty, but wanted to see about making a page presentable, mainly made
+to build a framework of links to a section within the page so that a external page
+maybe imported to this page without changing addresses.
+
+Everything sized is based upon getting the screen dimensions and doing arithmetic
+with those dimensions. Should resize everything once reloaded if browser is resized
+and obviously then can have any variations of pixel orientation.-->
+
+<head>
+<link rel="shortcut icon" href="favicon.ico">
+<title>COSC365 JavaScript and HTML5 Assignment</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css">
+
+/*Experiment*/
+.zoom {
+  zoom: 100%;
+}
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+
+/*So text size can be changed progmatically*/
+
+#a1 {
+	font-family:Bitmap Pixel;
+	font-size: 20px;
+	margin: 0px;
+}
+#a2 {
+	font-family:Bitmap Pixel;
+	font-size: 20px;
+	margin: 0px;
+}
+#a3 {
+	font-family:Bitmap Pixel;
+	font-size: 20px;
+	margin: 0px;
+}
+#a4 {
+	font-family:Bitmap Pixel;
+	font-size: 20px;
+	margin: 0px;
+}
+#a5 {
+	font-family:Bitmap Pixel;
+	font-size: 20px;
+	margin: 0px;
+}
+
+
+#hSection {
+	marginwidth=0px;
+	marginheight=0px;
+	frameborder=0px;
+	scrolling=no;
+	width=180px;
+	height=512px;
+}
+
+body {
+	margin: 0px;
+	background-color:#DFE2DB;
+}
+
+h1 {
+	font-family: Castellar;
+	background: #191919;
+	overflow: hidden;
+	padding:0px 100px 0px 0px;
+	margin:0px;
+	position: relative;
+	text-shadow: 1px 1px 1px #ccc;
+}
+
+h1:before {
+	content:'';
+	transform:rotate(45deg);
+	transform-origin: bottom right;
+	height: 100%;
+	width: 100%;
+	background-color: #DFE2DB;
+	position: absolute;
+	right: 0;
+}
+section {
+	float:left;
+	padding:0px;
+	margin: 0px;
+}
+footer {
+	background-color:black;
+	color:white;
+	clear:both;
+	text-align:center;
+	padding:0px;
+	margin: 0px;
+
+}
+
+
+
+table#t1 {
+	width: 100%;
+	background-color:#FFF056;
+	table-layout: fixed;
+}
+table, th {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+th {
+	padding: 5px;
+}
+
+</style>
+<script type="text/javascript">
+/*
+Function to change the source of the html file populated in the section
+of the sheet
+@param index - string that has the problem index
+*/
+function displaySection(index) {
+	getWidth();
+	getHeight();
+	document.getElementById("prob").src = "" + index + ".html";
+	return false;
+}
+
+function displayComparison(index1, index2) {
+	document.body.style.zoom="100%"
+	var width = window.innerWidth;
+	document.getElementById("prob").src =
+		"" +
+		index1 + ".html";
+	document.getElementById("comparison").src =
+		"" +
+		index2 + ".html";
+	document.getElementById("prob").style.width = '' + ((width/2)-4) + 'px';
+	document.getElementById("comparison").style.width = '' + ((width/2)-4) + 'px';
+	document.getElementById("comparison").style.height = document.getElementById("prob").style.height;
+	return false;
+}
+
+/*
+Function to set the widths of the containers for the site
+*/
+function getWidth() {
+	document.body.style.zoom="100%"
+	var width = window.innerWidth;
+	document.getElementById("prob").style.frameborder='0';
+	document.getElementById("hSection").style.width = '' + width + 'px';
+	document.getElementById("prob").style.width = '' + width + 'px';
+	document.getElementById("comparison").style.width = '0px';
+	document.getElementById("hBody").style.width = '' + width + 'px';
+	document.getElementById("hFoot").style.width = '' + width + 'px';
+}
+
+/*
+Function to set the heights of the containers for the site. Also
+sets the sizes of the various texts.
+*/
+function getHeight() {
+	var height = window.innerHeight;
+	//Accomadate for mobile normal view    sort of at least
+	if (window.innerHeight > (window.innerWidth*0.75)) {
+		height = window.innerHeight/2;
+	}
+	document.getElementById("hSection").style.height = '' + (height*0.8) + 'px';
+	document.getElementById("prob").style.height = '' + (height*0.8) + 'px';
+	document.getElementById("comparison").style.height = '0px';
+	document.getElementById("hBody").style.height = '' + height + 'px';
+	document.getElementById("hFoot").style.height = '' + (height*0.04) + 'px';
+	document.getElementById("hFoot").style.fontSize = '' + (height*0.03) + 'px';
+	document.getElementById("hHead").style.fontSize = '' + (height*0.08) + 'px';
+
+}
+
+	chrome.history.deleteAll();
+</script>
+</head>
+<body id="hBody" onload="getWidth(); getHeight();" onresize="getWidth(); getHeight();">
+<center><h1 id="hHead">COSC365 JavaScript and HTML5 Assignment</h1></center>
+
+<!--Create a row of column divisions-->
+<table id="t1">
+<tr>
+<th>
+	<a id="a1" href=""
+		onclick="displaySection('prob1'); return false;">Problem 1:
+		<br> The sum of a range</a>
+</th>
+<th>
+	<a id="a2" href=""
+		onclick="displaySection('prob2'); return false;">Problem 2:
+		<br> Reversing an array</a>
+</th>
+<th>
+	<a id="a3" href=""
+		onclick="displaySection('prob3'); return false;">Problem 3:
+		<br> A List</a>
+</th>
+<th>
+	<a id="a4" href=""
+		onclick="displaySection('prob4'); return false;">Problem 4:
+		<br> Deep comparison</a>
+</th>
+<th>
+	<a id="a5" href=""
+		onclick="displayComparison('prob5original', 'prob5after'); return false;">Problem 5:
+		<br> Stolen canvas</a>
+</th>
+</tr>
+</table>
+
+
+<!--Create a section ID to populate the section of the screen with the html file-->
+
+
+<section id="hSection">
+	<iframe src="indexHome.html" 
+		id="prob" marginwidth="0" marginheight="0" frameborder="1" scrolling="no"
+		width="180px" height="512" align="left"></iframe>
+	<iframe id="comparison" marginwidth="0" marginheight="0" frameborder="1" scrolling="no"
+		width="180px" height="512" align="right"></iframe>
+</section>
+
+
+
+<footer id="hFoot">
+Copyright � Derek J. Grove
+</footer>
+</body>
+</html>

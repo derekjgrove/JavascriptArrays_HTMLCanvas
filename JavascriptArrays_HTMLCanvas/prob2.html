@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<!--Arrays have a method reverse, which changes the array by inverting the 
+order in which its elements appear. For this exercise, write two functions,
+reverseArray and reverseArrayInPlace. The first, reverseArray, takes an array
+as argument and produces a new array that has the same elements in the inverse
+order. The second, reverseArrayInPlace, does what the reversemethod does: it
+modifies the array given as argument in order to reverse its elements. Neither
+may use the standard reverse method. Thinking back to the notes about side
+effects and pure functions in the previous chapter, which variant do you expect
+to be useful in more situations? Which one is more efficient?-->
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<!--Style the Heading1, Heading3, and Paragraph segments-->
+<style type="text/css">
+h1 {
+	font-family: Constantia;
+	Color: Black;
+	text-decoration: italic;
+}
+h3 {
+	font-family: Lucida Console;
+	font-size: 24px;
+	color: Grey;
+	text-decoration: underline;
+}
+p {
+	font-family: Consolas;
+	font-size: 16px;
+	color: black;
+}
+</style>
+<title>Problem2: Reversing an array</title>
+<script type="text/javascript">
+/*
+Reverse the contents of an array by copying elements over into a 
+new local array
+@param arr - the array object
+*/
+function reverseArray(arr) {
+	//Determine if no array was passed in, or if length is zero
+	if (arr == null || arr.length == 0) {
+		return "Please pass in an array";
+	}
+	var array = [];
+	var j = 0;
+	//Decrement through passed in array, copying element over to new array
+	for (i = arr.length - 1; i >= 0; i--) {
+		array[j] = arr[i];
+		j++;
+	}
+	return array;
+}
+
+/*
+Reverse the contents of an array by changing the content within the
+passed in array
+@param arr - the array object
+*/
+function reverseArrayInPlace(arr) {
+	if (arr == null || arr.length == 0) {
+		return "Please pass in an array";
+	}
+	//Only loop through half the size of the array replacing n - tail places
+	//with n - head places
+	for (i = 0; i <= arr.length/2 - 1; i++) {
+		var temp = arr[i];
+		arr[i] = arr[arr.length-i-1];
+		arr[arr.length-i-1] = temp;
+	}
+	return arr;
+}
+/*
+Test function in displaying multiple cases
+*/
+function displayContent() {
+	document.getElementById('1st').innerHTML = "reverseArray(): " +
+		reverseArray();
+	document.getElementById('2nd').innerHTML = "reverseArray([]): " +
+		reverseArray([]);
+	document.getElementById('3rd').innerHTML = "reverseArray([\"A\", \"B\", \"C\"]): " +
+		reverseArray(["A", "B", "C"]);
+	document.getElementById('4th').innerHTML = "reverseArrayInPlace(): " +
+		reverseArrayInPlace();
+	document.getElementById('5th').innerHTML = "reverseArrayInPlace([]): " +
+		reverseArrayInPlace([]);
+	document.getElementById('6th').innerHTML = "reverseArrayInPlace([1,2,3,4,5]): " +
+		reverseArrayInPlace([1,2,3,4,5]);
+	document.getElementById('7th').innerHTML = "reverseArrayInPlace([1,2,3,4,5,6,7,8,9,10,11,12]): " +
+		reverseArrayInPlace([1,2,3,4,5,6,7,8,9,10,11,12]);
+}
+
+console.log(reverseArray(["A", "B", "C"]));
+var arrayValue = [1, 2, 3, 4, 5];
+reverseArrayInPlace(arrayValue);
+console.log(arrayValue);
+</script>
+</head>
+
+<!--When the page loads, call the test function to display test results-->
+<body onload="displayContent()">
+<h1>Problem 2: Reversing an array</h1>
+<h3>Tests</h3>
+
+<!--Create IDs to enable JavaScript writing to the page-->
+<p id='1st'></p>
+<p id='2nd'></p>
+<p id='3rd'></p>
+<p id='4th'></p>
+<p id='5th'></p>
+<p id='6th'></p>
+<p id='7th'></p>
+</body>
+</html>
